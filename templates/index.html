@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Ultimate App</title>
+    <style>
+        :root { --neon: #00f2ff; --bg: #0a0a0c; }
+        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; text-align: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
+        .card { background: rgba(255,255,255,0.05); border: 1px solid var(--neon); padding: 15px; border-radius: 15px; }
+        input, button { width: 90%; padding: 10px; margin: 5px; border-radius: 8px; border: none; }
+        input { background: #1a1a1a; color: white; border-bottom: 2px solid var(--neon); }
+        button { background: var(--neon); color: black; font-weight: bold; cursor: pointer; }
+        img, audio { width: 100%; border-radius: 10px; margin-top: 10px; }
+        .loading { color: yellow; font-size: 0.8em; display: none; }
+    </style>
+</head>
+<body>
+    <h1>مساعدك الخارق 2026</h1>
+    <div class="grid">
+        <div class="card">
+            <h3>الدردشة وحل الأسئلة</h3>
+            <input id="chatInput" placeholder="اكتب سؤالك هنا...">
+            <button onclick="runAI('/ask', 'chatInput', 'chatOut')">اسأل</button>
+            <p id="chatOut"></p>
+        </div>
+        <div class="card">
+    <h3>تعديل صورك الخاصة</h3>
+    <input type="file" id="fileInput" accept="image/*">
+    <input type="text" id="editPrompt" placeholder="ماذا تريد أن نغير في الصورة؟">
+    <button onclick="uploadAndEdit()">تعديل وارسال</button>
+    <div id="editOut"></div>
+</div>
+
+<div class="card">
+    <h3>صناعة فيديو (AI Video)</h3>
+    <input id="videoInput" placeholder="وصف مشهد الفيديو...">
+    <button onclick="runAI('/make-video', 'videoInput', 'videoOut', 'video')">صنع فيديو</button>
+    <div id="videoOut"></div>
+</div>
+
+<script>
+// أضف هذا السطر داخل دالة runAI في جزء الـ if conditions
+if(type === 'video') out.innerHTML = `<video controls width="100%"><source src="${data.video_path}" type="video/mp4"></video>`;
+</script>
+
+<script>
+async function uploadAndEdit() {
+    const file = document.getElementById('fileInput').files[0];
+    const prompt = document.getElementById('editPrompt').value;
+    const out = document.getElementById('editOut');
+
+    if (!file) { alert("من فضلك اختر صورة أولاً"); return; }
+
+    out.innerText = "جاري رفع ومعالجة صورتك...";
+
+    // تحويل الصورة لـ Base64 لإرسالها
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+        const response = await fetch('/edit-image', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({img_url: reader.result, prompt: prompt})
+        });
+        const data = await response.json();
+        if(data.url) out.innerHTML = `<img src="${data.url}">`;
+        else out.innerText = data.error;
+    };
+}
+</script>
+
+        <div class="card">
+            <h3>صناعة موسيقى</h3>
+            <input id="musicInput" placeholder="مثلاً: موسيقى هادئة بيانو...">
+            <button onclick="runAI('/make-music', 'musicInput', 'musicOut', 'audio')">اصنع</button>
+            <div id="musicOut"></div>
+        </div>
+    </div>
+
+    <script>
+        async function runAI(route, inputId, outId, type='text') {
+            const val = document.getElementById(inputId).value;
+            const out = document.getElementById(outId);
+            out.innerHTML = "جاري الاتصال بالعقل الاصطناعي...";
+            
+            const response = await fetch(route, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: val, prompt: val})
+            });
+            const data = await response.json();
+            
+            if(type === 'text') out.innerText = data.result || data.answer;
+            if(type === 'img') out.innerHTML = `<img src="${data.url}">`;
+            if(type === 'audio') out.innerHTML = `<audio controls src="${data.audio_path}"></audio>`;
+        }
+    </script>
+</body>
+</html>
+
