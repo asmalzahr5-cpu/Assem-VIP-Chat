@@ -67,6 +67,9 @@ HTML_TEMPLATE = """
         .header { padding: 15px; text-align: center; background: rgba(0,0,0,0.8); border-bottom: 2px solid var(--neon-blue); box-shadow: 0 0 20px rgba(0, 243, 255, 0.3); }
         .header h1 { margin: 0; font-size: 1.6em; background: linear-gradient(90deg, #fff, var(--neon-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
+        /* حاوية الإعلانات */
+        .ad-container { width: 100%; display: flex; justify-content: center; padding: 10px 0; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(0,243,255,0.1); }
+
         #chat-box { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .msg { max-width: 85%; padding: 12px 18px; border-radius: 20px; font-size: 0.95em; line-height: 1.6; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -147,6 +150,20 @@ HTML_TEMPLATE = """
 
     <div id="app-container">
         <div class="header"><h1>عاصم زاهر</h1></div>
+        
+        <div class="ad-container">
+            <script>
+              atOptions = {
+                'key' : '8f24c4d9d8977782a58a5a37f536cd76',
+                'format' : 'iframe',
+                'height' : 50,
+                'width' : 320,
+                'params' : {}
+              };
+            </script>
+            <script src="https://www.highperformanceformat.com/8f24c4d9d8977782a58a5a37f536cd76/invoke.js"></script>
+        </div>
+
         <div id="chat-box"></div>
         
         <div class="input-area">
@@ -303,7 +320,6 @@ def gen_music():
     p = request.json.get('prompt')
     try:
         res = music_client.predict(p, api_name="/predict")
-        # معالجة النتيجة سواء كانت رابطاً أو قائمة
         path = res[0] if isinstance(res, list) else res
         return jsonify({"path": path})
     except: return jsonify({"error": "تعذر توليد اللحن"})
@@ -318,6 +334,9 @@ def gen_video():
         return jsonify({"path": path})
     except: return jsonify({"error": "تعذر توليد الفيديو"})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+import os
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
+
 
